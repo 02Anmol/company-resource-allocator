@@ -1,17 +1,17 @@
-// package handlers
+package handlers
 
-// import (
-// 	"company-resource-portal/internal/repository"
-// 	"net/http"
+import (
+	"net/http"
 
-// 	"github.com/gin-gonic/gin"
-// )
+	"github.com/02Anmol/company-resource-allocator/internal/repository"
+	"github.com/gin-gonic/gin"
+)
 
-// func GetResources(c *gin.Context) {
-// 	items, err := repository.GetAllResources()
-// 	if err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch resources"})
-// 		return
-// 	}
-// 	c.JSON(http.StatusOK, items)
-// }
+func GetResources(c *gin.Context) {
+	res, err := repository.GetAllResource()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to fetch resources"})
+		return
+	}
+	c.JSON(http.StatusOK, res)
+}
