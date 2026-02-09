@@ -74,3 +74,30 @@ func GetMyRequests(c *gin.Context) {
 
 	c.JSON(200, req)
 }
+
+// Approve request from store manager list
+func GetApprovedRequests(c *gin.Context) {
+	requests, err := repository.GetRequestsByStatus("manager_approved")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch approved requests"})
+		return
+	}
+	c.JSON(http.StatusOK, requests)
+}
+
+func FulfillRequest(c *gin.Context) {
+	var body struct {
+		ID int `json:"id" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(400, gin.H{"error": "Invalid ID"})
+		return
+	}
+
+	err := repository.FulfillRequest(body.ID)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(200, gin.H{"nessage": "Item issued successfully"})
+}

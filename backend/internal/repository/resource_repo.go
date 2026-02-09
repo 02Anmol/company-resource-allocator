@@ -25,3 +25,9 @@ func GetAllResource() ([]models.Resource, error) {
 	}
 	return res, nil
 }
+
+func AddResource(name string, qty int) error {
+	query := `INSERT INTO resources (name, total_quantity, available_quantity) VALUES ($1, $2, $2)`
+	_, err := database.DB.Exec(context.Background(), query, name, qty)
+	return err
+}

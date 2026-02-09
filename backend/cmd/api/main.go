@@ -34,9 +34,15 @@ func main() {
 		c.JSON(200, gin.H{"messgae": "You are talking with Database"})
 	})
 	r.GET("/api/resources", handlers.GetResources)
+	r.POST("/api/resources", handlers.CreateResource) //store manager add items
+
 	r.POST("/api/requests", handlers.SubmitRequest)
 	r.GET("/api/requests/pending", handlers.GetPendingRequests)
-	r.PATCH("/api/requests/action", handlers.HandleRequestAction)
+	r.GET("/api/requests/approved", handlers.GetApprovedRequests) //store manager sees the list
+
+	r.PATCH("/api/requests/action", handlers.HandleRequestAction) // main manager approves
+	r.PATCH("/api/requests/fulfill", handlers.FulfillRequest)     // store manager fulfills
+
 	r.GET("/api/my-requests", handlers.GetMyRequests)
 
 	r.Run(":8080")
