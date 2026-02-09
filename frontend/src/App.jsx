@@ -3,11 +3,13 @@ import axios from 'axios'
 
 function App() {
   // --- STATE ---
-  const [view, setView] = useState("employee") // Toggle: 'employee' or 'manager'
+  const [view, setView] = useState("employee") 
   const [resources, setResources] = useState([])
   const [pendingRequests, setPendingRequests] = useState([])
+  const [searchEmail, setSearchEmail] = useState("")
+  const [myRequests, setMyRequests] = useState([])
   
-  // Form State
+  // Form/Modal State
   const [selectedResource, setSelectedResource] = useState(null)
   const [email, setEmail] = useState("")
   const [reason, setReason] = useState("")
@@ -16,14 +18,24 @@ function App() {
   // --- API CALLS ---
   const fetchResources = () => {
     axios.get('http://localhost:8080/api/resources')
-      .then(res => setResources(res.data))
+      .then(res => setResources(Array.isArray(res.data) ? res.data : []))
       .catch(err => console.error("Error fetching resources:", err))
   }
 
   const fetchPendingRequests = () => {
     axios.get('http://localhost:8080/api/requests/pending')
-      .then(res => setPendingRequests(res.data))
-      .catch(err => console.error("Error fetching requests:", err))
+      .then(res => setPendingRequests(Array.isArray(res.data) ? res.data : []))
+      .catch(err => {
+        console.error("Error fetching requests:", err)
+        setPendingRequests([]) 
+      })
+  }
+
+  const fetchMyHistory = () => {
+    if (!searchEmail) return;
+    axios.get(`http://localhost:8080/api/my-requests?email=${searchEmail}`)
+      .then(res => setMyRequests(Array.isArray(res.data) ? res.data : []))
+      .catch(() => setMyRequests([]));
   }
 
   useEffect(() => {
@@ -31,9 +43,10 @@ function App() {
     if (view === "manager") fetchPendingRequests()
   }, [view])
 
-  // --- HANDLERS ---
-  const handleRequestSubmit = (e) => {
-    e.preventDefault()
+  // --- HANDLERS (The missing function was here!) ---
+  const handleSubmitRequest = (e) => {
+    if (e) e.preventDefault(); // Prevent page reload
+    
     const payload = {
       employee_email: email,
       resource_id: selectedResource.id,
@@ -45,6 +58,7 @@ function App() {
         setMessage({ text: "Request submitted successfully!", type: "success" })
         setSelectedResource(null)
         setEmail(""); setReason("");
+        fetchResources(); // Update stock count immediately
       })
       .catch(err => setMessage({ text: "Error: " + err.response?.data?.error, type: "error" }))
   }
@@ -52,66 +66,54 @@ function App() {
   const handleAction = (id, status) => {
     axios.patch('http://localhost:8080/api/requests/action', { id, status })
       .then(() => {
-        setMessage({ text: `Request ${status} successfully!`, type: "success" })
+        setMessage({ text: `Request ${status}!`, type: "success" })
         fetchPendingRequests()
-        fetchResources() // Refresh stock count
+        fetchResources() 
       })
-      .catch(err => setMessage({ text: "Action failed", type: "error" }))
+      .catch(() => setMessage({ text: "Action failed", type: "error" }))
   }
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
-      {/* Navigation Bar */}
-      <nav className="bg-white border-b border-slate-200 px-8 py-4 flex justify-between items-center sticky top-0 z-10">
+      {/* Navigation - Always Visible */}
+      <nav className="bg-white border-b border-slate-200 px-8 py-4 flex justify-between items-center sticky top-0 z-10 shadow-sm">
         <h1 className="text-xl font-bold tracking-tight text-indigo-600">ResourcePortal.io</h1>
-        <div className="flex bg-slate-100 p-1 rounded-lg">
-          <button 
-            onClick={() => setView("employee")} 
-            className={`px-4 py-1.5 rounded-md text-sm font-medium transition ${view === 'employee' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}
-          >
-            Storefront
-          </button>
-          <button 
-            onClick={() => setView("manager")} 
-            className={`px-4 py-1.5 rounded-md text-sm font-medium transition ${view === 'manager' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}
-          >
-            Manager Dashboard
-          </button>
+        <div className="flex bg-slate-100 p-1 rounded-xl">
+          {['employee', 'history', 'manager'].map((v) => (
+            <button 
+              key={v}
+              onClick={() => { setView(v); setMessage({text:"", type:""}); }} 
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition capitalize ${view === v ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              {v === 'employee' ? 'Storefront' : v === 'history' ? 'My Requests' : 'Manager'}
+            </button>
+          ))}
         </div>
       </nav>
 
       <main className="max-w-6xl mx-auto p-8">
-        {/* Global Feedback Message */}
         {message.text && (
-          <div className={`mb-6 p-4 rounded-lg border ${message.type === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-red-50 border-red-200 text-red-700'}`}>
-            {message.text}
-            <button className="float-right font-bold" onClick={() => setMessage({text:"", type:""})}>&times;</button>
+          <div className={`mb-6 p-4 rounded-xl border flex justify-between items-center ${message.type === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-red-50 border-red-200 text-red-700'}`}>
+            <span className="text-sm font-medium">{message.text}</span>
+            <button onClick={() => setMessage({text:"", type:""})} className="text-lg font-bold">×</button>
           </div>
         )}
 
-        {/* --- EMPLOYEE VIEW --- */}
+        {/* --- STOREFRONT --- */}
         {view === "employee" && (
           <div>
-            <div className="mb-8">
-              <h2 className="text-3xl font-extrabold">Available Equipment</h2>
-              <p className="text-slate-500">Select an item to request for your workstation.</p>
-            </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <h2 className="text-3xl font-black mb-8 text-center">Available Equipment</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {resources.map(item => (
-                <div key={item.id} className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition">
-                  <div className="flex justify-between items-start mb-4">
-                    <h3 className="text-lg font-bold">{item.name}</h3>
-                    <span className={`px-2 py-1 rounded text-xs font-bold ${item.available_quantity > 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
-                      {item.available_quantity} In Stock
-                    </span>
-                  </div>
+                <div key={item.id} className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm hover:shadow-md transition">
+                  <h3 className="text-xl font-bold mb-2">{item.name}</h3>
+                  <p className="text-slate-500 text-sm mb-6">Stock: {item.available_quantity}</p>
                   <button 
                     disabled={item.available_quantity === 0}
                     onClick={() => setSelectedResource(item)}
-                    className="w-full mt-2 bg-indigo-600 text-white py-2.5 rounded-xl font-semibold hover:bg-indigo-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition"
+                    className="w-full bg-slate-900 text-white py-3 rounded-2xl font-bold hover:bg-slate-800 disabled:bg-slate-200 transition"
                   >
-                    {item.available_quantity > 0 ? "Request This Item" : "Out of Stock"}
+                    {item.available_quantity > 0 ? "Request Item" : "Out of Stock"}
                   </button>
                 </div>
               ))}
@@ -122,86 +124,99 @@ function App() {
         {/* --- MANAGER VIEW --- */}
         {view === "manager" && (
           <div>
-            <div className="mb-8">
-              <h2 className="text-3xl font-extrabold">Approval Queue</h2>
-              <p className="text-slate-500">Review and process employee resource requests.</p>
-            </div>
-            
-            <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+            <h2 className="text-3xl font-black mb-8">Approval Queue</h2>
+            <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
               <table className="w-full text-left">
                 <thead className="bg-slate-50 border-b border-slate-200">
                   <tr>
-                    <th className="px-6 py-4 text-sm font-semibold text-slate-600">Employee</th>
-                    <th className="px-6 py-4 text-sm font-semibold text-slate-600">Resource</th>
-                    <th className="px-6 py-4 text-sm font-semibold text-slate-600">Reason</th>
-                    <th className="px-6 py-4 text-sm font-semibold text-slate-600 text-right">Actions</th>
+                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Request Details</th>
+                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {pendingRequests.map(req => (
-                    <tr key={req.id} className="hover:bg-slate-50/50 transition">
-                      <td className="px-6 py-4 text-sm">{req.employee_email}</td>
-                      <td className="px-6 py-4 text-sm font-medium">{req.resource_name}</td>
-                      <td className="px-6 py-4 text-sm text-slate-500 italic">"{req.reason}"</td>
-                      <td className="px-6 py-4 text-right space-x-2">
-                        <button 
-                          onClick={() => handleAction(req.id, 'approved')}
-                          className="px-3 py-1.5 bg-emerald-600 text-white text-xs font-bold rounded-lg hover:bg-emerald-700"
-                        >
-                          Approve
-                        </button>
-                        <button 
-                          onClick={() => handleAction(req.id, 'rejected')}
-                          className="px-3 py-1.5 bg-slate-200 text-slate-700 text-xs font-bold rounded-lg hover:bg-slate-300"
-                        >
-                          Reject
-                        </button>
-                      </td>
+                  {pendingRequests.length > 0 ? (
+                    pendingRequests.map(req => (
+                      <tr key={req.id} className="hover:bg-slate-50 transition">
+                        <td className="px-6 py-6">
+                          <div className="text-sm font-bold text-indigo-600">{req.resource_name}</div>
+                          <div className="text-xs text-slate-500 mt-1 italic">{req.employee_email}: "{req.reason}"</div>
+                        </td>
+                        <td className="px-6 py-6 text-right space-x-3">
+                          <button onClick={() => handleAction(req.id, 'approved')} className="px-4 py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl hover:bg-emerald-700 transition">Approve</button>
+                          <button onClick={() => handleAction(req.id, 'rejected')} className="px-4 py-2 bg-slate-200 text-slate-600 text-xs font-bold rounded-xl hover:bg-slate-300 transition">Reject</button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="2" className="p-20 text-center text-slate-400 italic">No pending requests at the moment.</td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
-              {pendingRequests.length === 0 && (
-                <div className="p-20 text-center text-slate-400">
-                  <p>All caught up! No pending requests.</p>
+            </div>
+          </div>
+        )}
+
+        {/* --- HISTORY VIEW --- */}
+        {view === "history" && (
+          <div className="max-w-2xl mx-auto">
+            <h2 className="text-3xl font-black mb-8 text-center">My Request Status</h2>
+            <div className="flex gap-2 mb-8">
+              <input 
+                type="email" 
+                placeholder="Enter your email..." 
+                className="flex-1 border border-slate-200 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500"
+                value={searchEmail}
+                onChange={(e) => setSearchEmail(e.target.value)}
+              />
+              <button onClick={fetchMyHistory} className="bg-indigo-600 text-white px-8 py-4 rounded-2xl font-bold hover:bg-indigo-700">Search</button>
+            </div>
+            <div className="space-y-4">
+              {myRequests.map(r => (
+                <div key={r.id} className="p-6 bg-white border border-slate-200 rounded-2xl flex justify-between items-center shadow-sm">
+                  <div>
+                    <h4 className="font-bold">{r.resource_name}</h4>
+                    <p className="text-xs text-slate-400">{new Date(r.created_at).toLocaleDateString()}</p>
+                  </div>
+                  <span className={`px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                    r.status === 'approved' ? 'bg-emerald-100 text-emerald-700' : 
+                    r.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'
+                  }`}>
+                    {r.status}
+                  </span>
                 </div>
-              )}
+              ))}
+              {myRequests.length === 0 && searchEmail && <p className="text-center text-slate-400">No history found.</p>}
             </div>
           </div>
         )}
       </main>
 
-      {/* --- REQUEST MODAL --- */}
+      {/* --- MODAL --- */}
       {selectedResource && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 animate-in fade-in zoom-in duration-200">
-            <h2 className="text-2xl font-bold mb-1">Request {selectedResource.name}</h2>
-            <p className="text-slate-500 mb-6 text-sm">Fill in your details to submit this request.</p>
-            
-            <form onSubmit={handleRequestSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-semibold mb-1">Work Email</label>
-                <input 
-                  type="email" placeholder="e.g. name@company.com" required
-                  className="w-full border border-slate-200 p-3 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition"
-                  value={email} onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold mb-1">Reason for Request</label>
-                <textarea 
-                  placeholder="Why do you need this item?" required rows="3"
-                  className="w-full border border-slate-200 p-3 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition"
-                  value={reason} onChange={(e) => setReason(e.target.value)}
-                />
-              </div>
-              <div className="flex gap-3 pt-2">
-                <button type="submit" className="flex-1 bg-indigo-600 text-white py-3 rounded-xl font-bold hover:bg-indigo-700 transition">
-                  Confirm Request
-                </button>
-                <button type="button" onClick={() => setSelectedResource(null)} className="flex-1 bg-slate-100 text-slate-600 py-3 rounded-xl font-bold hover:bg-slate-200 transition">
-                  Cancel
-                </button>
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-[2rem] shadow-2xl max-w-md w-full p-8">
+            <h2 className="text-2xl font-black mb-6 text-slate-800">Request {selectedResource.name}</h2>
+            <form onSubmit={handleSubmitRequest} className="space-y-4">
+              <input 
+                type="email" 
+                placeholder="Work Email" 
+                required
+                className="w-full border border-slate-200 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500" 
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)} 
+              />
+              <textarea 
+                placeholder="Reason for request" 
+                required
+                className="w-full border border-slate-200 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500" 
+                value={reason} 
+                onChange={(e) => setReason(e.target.value)} 
+              />
+              <div className="flex gap-4 pt-4">
+                <button type="submit" className="flex-1 bg-indigo-600 text-white py-4 rounded-2xl font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-200">Submit</button>
+                <button type="button" onClick={() => setSelectedResource(null)} className="flex-1 bg-slate-100 py-4 rounded-2xl font-bold text-slate-500">Cancel</button>
               </div>
             </form>
           </div>
