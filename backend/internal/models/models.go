@@ -13,6 +13,7 @@ type Request struct {
 	ID            int       `json:"id"`
 	EmployeeEmail string    `json:"employee_email"`
 	ResourceID    int       `json:"resource_id" binding:"required"`
+	ResourceName  string    `json:"resource_name"`
 	Reason        string    `json:"reason" binding:"required"`
 	Status        string    `json:"status"`
 	CreatedAt     time.Time `json:"created_at"`
