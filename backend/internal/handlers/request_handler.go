@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/02Anmol/company-resource-allocator/internal/models"
@@ -14,6 +15,7 @@ func SubmitRequest(c *gin.Context) {
 	//validate the incomeing json data
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		fmt.Printf("Received Request: %+v\n", req)
 	}
 	err := repository.CreateRequest(req)
 	if err != nil {
