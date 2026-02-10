@@ -22,7 +22,7 @@ function App() {
     if(message.text){
       const timer = setTimeout(()=>{
         setMessage({text: "", type: ""});
-      },3000);  //3 sec time msg
+      },2000); 
 
       return ()=> clearTimeout(timer);
     }

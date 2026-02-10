@@ -18,3 +18,15 @@ type Request struct {
 	Status        string    `json:"status"`
 	CreatedAt     time.Time `json:"created_at"`
 }
+
+type User struct {
+	ID       int    `json:"id"`
+	Email    string `json:"email" binding:"required"`
+	Password string `json:"password,omitempty" binding:"required"`
+	Role     string `json:"role"`
+}
+
+type LoginCredential struct {
+	Email    string `json:"email" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
