@@ -31,13 +31,18 @@ function App() {
 
  //fetch data base on view
  const fetchData = async ()=>{
+  if (!user) return;
   try{
     const res = await axios.get('http://localhost:8080/api/resources');
     setResources(res.data || []);
 
-    if (view === "manager"){
-      const pending = await axios.get('http://localhost:8080/api/requests/pending')
-      setPendingRequests(pending.data || []);
+    if (view === "manager" && user.role !== "employee") {
+        const pending = await axios.get('http://localhost:8080/api/requests/pending');
+        setPendingRequests(pending.data || []);
+    }
+    if (view === "store" && user.role === "store") {
+        const approved = await axios.get('http://localhost:8080/api/requests/approved');
+        setApprovedRequests(approved.data || []);
     }
   } catch(err){
     console.error("Fetch error:", err);
@@ -47,8 +52,6 @@ function App() {
  useEffect(() =>{
   if(user) fetchData();
  }, [user, view]);
-
- 
 
 
   //pop-up timer : auto dismiss msg
@@ -70,13 +73,14 @@ function App() {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setUser(null);
+    setView("employee");   // reset view on logout
     setMessage({ text: "Logged out successfully", type: "success" });
   };
 
   const handleRequestSubmit = (e) => {
     e.preventDefault()
     axios.post('http://localhost:8080/api/requests', {
-      employee_email: email,
+      employee_email: user.email,
       resource_id: selectedResource.id,
       reason: reason
     }).then(() => {
@@ -104,7 +108,11 @@ function App() {
       .then(() => { setMessage({ text: "Inventory Added!", type: "success" }); setNewResName(""); fetchData(); })
   }
 
-  console.log("Current View:", view, "Resources count:", resources.length);
+  if (!user) {
+    return <AuthScreen onLoginSuccess={setUser} setMessage={setMessage} />;
+  }
+
+  // console.log("Current View:", view, "Resources count:", resources.length);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
