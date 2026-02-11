@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
+import AuthScreen from './components/AuthScreen'
 
 function App() {
+  const [user, setUser] = useState(null);
   const [view, setView] = useState("employee") // 'employee', 'history', 'manager', 'store'
   const [resources, setResources] = useState([])
   const [pendingRequests, setPendingRequests] = useState([])
@@ -17,6 +19,38 @@ function App() {
   const [newResQty, setNewResQty] = useState(1)
   const [message, setMessage] = useState({ text: "", type: "" })
 
+  
+
+  //check if user is already logged in on page load
+  useEffect(() => {
+    const savedUser = localStorage.getItem("user");
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+  }, []);
+
+ //fetch data base on view
+ const fetchData = async ()=>{
+  try{
+    const res = await axios.get('http://localhost:8080/api/resources');
+    setResources(res.data || []);
+
+    if (view === "manager"){
+      const pending = await axios.get('http://localhost:8080/api/requests/pending')
+      setPendingRequests(pending.data || []);
+    }
+  } catch(err){
+    console.error("Fetch error:", err);
+  }
+ };
+
+ useEffect(() =>{
+  if(user) fetchData();
+ }, [user, view]);
+
+ 
+
+
   //pop-up timer : auto dismiss msg
   useEffect(()=>{
     if(message.text){
@@ -28,21 +62,17 @@ function App() {
     }
   }, [message])
 
-  // --- API CALLS ---
-  const fetchData = () => {
-    axios.get('http://localhost:8080/api/resources').then(res => setResources(res.data || []))
-    
-    if (view === "manager") {
-      axios.get('http://localhost:8080/api/requests/pending').then(res => setPendingRequests(res.data || []))
-    }
-    if (view === "store") {
-      axios.get('http://localhost:8080/api/requests/approved').then(res => setApprovedRequests(res.data || []))
-    }
-  }
 
   useEffect(() => { fetchData() }, [view])
 
   //actions
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setUser(null);
+    setMessage({ text: "Logged out successfully", type: "success" });
+  };
+
   const handleRequestSubmit = (e) => {
     e.preventDefault()
     axios.post('http://localhost:8080/api/requests', {
@@ -73,6 +103,8 @@ function App() {
     axios.post('http://localhost:8080/api/resources', { name: newResName, quantity: parseInt(newResQty) })
       .then(() => { setMessage({ text: "Inventory Added!", type: "success" }); setNewResName(""); fetchData(); })
   }
+
+  console.log("Current View:", view, "Resources count:", resources.length);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">

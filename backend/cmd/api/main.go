@@ -45,5 +45,9 @@ func main() {
 
 	r.GET("/api/my-requests", handlers.GetMyRequests)
 
+	//auth routes
+	r.POST("/api/signup", handlers.Signup)
+	r.POST("/api/login", handlers.Login)
+
 	r.Run(":8080")
 }
