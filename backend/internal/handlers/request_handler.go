@@ -16,6 +16,7 @@ func SubmitRequest(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		fmt.Printf("Received Request: %+v\n", req)
+		return
 	}
 	err := repository.CreateRequest(req)
 	if err != nil {

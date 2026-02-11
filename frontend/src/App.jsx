@@ -116,7 +116,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
-      {/* NAVIGATION */}
+      {/* navigation */}
       <nav className="bg-white border-b p-4 flex justify-between items-center sticky top-0 z-10 shadow-sm">
         <h1 className="text-xl font-bold text-indigo-600">BitcommStore</h1>
         <div className="flex bg-slate-100 p-1 rounded-xl space-x-1">
@@ -131,7 +131,7 @@ function App() {
       <main className="max-w-6xl mx-auto p-8">
         {message.text && <div className={`mb-6 p-4 rounded-xl border ${message.type === 'success' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-red-50 text-red-700 border-red-200'}`}>{message.text}</div>}
 
-        {/* --- EMPLOYEE VIEW --- */}
+        {/* employee view */}
         {view === "employee" && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {resources.map(item => (
@@ -144,7 +144,7 @@ function App() {
           </div>
         )}
 
-        {/* --- MANAGER VIEW (Approval) --- */}
+        {/* manager view */}
         {view === "manager" && (
           <div className="bg-white rounded-3xl border overflow-hidden">
             <table className="w-full text-left">
@@ -166,7 +166,7 @@ function App() {
           </div>
         )}
 
-        {/* --- STORE MANAGER VIEW (Fulfillment & Add) --- */}
+        {/* store manager view */}
         {view === "store" && (
           <div>
             <div className="bg-white p-6 rounded-3xl border mb-8">
@@ -197,7 +197,7 @@ function App() {
           </div>
         )}
 
-        {/* --- HISTORY VIEW --- */}
+        {/* req history view */}
         {view === "history" && (
           <div className="max-w-xl mx-auto">
             <input className="w-full border p-4 rounded-2xl mb-4" placeholder="Enter email to check status..." value={searchEmail} onChange={e => setSearchEmail(e.target.value)} />
@@ -216,7 +216,7 @@ function App() {
         )}
       </main>
 
-      {/* REQUEST MODAL */}
+      {/* req model */}
       {selectedResource && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <form onSubmit={handleRequestSubmit} className="bg-white p-8 rounded-[2rem] max-w-md w-full shadow-2xl">
