@@ -43,11 +43,11 @@ func main() {
 	r.PATCH("/api/requests/action", handlers.HandleRequestAction) // main manager approves
 	r.PATCH("/api/requests/fulfill", handlers.FulfillRequest)     // store manager fulfills
 
-	r.GET("/api/my-requests", handlers.GetMyRequests)
+	r.GET("/api/my-requests", handlers.GetMyRequests) //to check history
 
 	//auth routes
-	r.POST("/api/signup", handlers.Signup)
-	r.POST("/api/login", handlers.Login)
+	r.POST("/api/auth/signup", handlers.Signup)
+	r.POST("/api/auth/login", handlers.Login)
 
 	r.Run(":8080")
 }

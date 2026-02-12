@@ -19,8 +19,8 @@ func CreateRequest(req models.Request) error {
 
 func GetPendingRequest() ([]models.Request, error) {
 	query := `
-		SELECT 
-			r.id, r.employee_email, r.resource_id, res.name, r.reason, r.status, r.created_at 
+		SELECT
+			r.id, r.employee_email, r.resource_id, res.name, r.reason, r.status, r.created_at
 		FROM requests r
 		JOIN resources res ON r.resource_id = res.id
 		WHERE r.status = 'pending'`
@@ -51,7 +51,7 @@ func UpdateRequestStatus(requestID int, newStatus string) error {
 
 func GetRequestsByStatus(status string) ([]models.Request, error) {
 	query := `
-		SELECT r.id, r.employee_email, r.resource_id, res.name, r.reason, r.status, r.created_at 
+		SELECT r.id, r.employee_email, r.resource_id, res.name, r.reason, r.status, r.created_at
 		FROM requests r
 		JOIN resources res ON r.resource_id = res.id
 		WHERE r.status = $1`
@@ -109,7 +109,7 @@ func FulfillRequest(requestID int) error {
 
 func FetchRequestByMail(email string) ([]models.Request, error) {
 	query := `
-		SELECT r.id, r.employee_email, res.name, r.reason, r.status, r.created_at 
+		SELECT r.id, r.employee_email, res.name, r.reason, r.status, r.created_at
 		FROM requests r
 		JOIN resources res ON r.resource_id = res.id
 		WHERE r.employee_email = $1
