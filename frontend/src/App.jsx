@@ -33,7 +33,7 @@ function App() {
     setLoading(true);
     try {
       const res = await api.get('/api/resources');
-      console.log("Full Response from Backend:", res);
+      // console.log("Full Response from Backend:", res);
       setResources(res.data || []);
 
       // Fetch pending requests for managers
@@ -52,8 +52,10 @@ function App() {
 
       // Fetch user's own requests for history view
       if (view === "history") {
-        const myReqs = await api.get('/api/my-requests');
-        setMyRequests(myReqs.data.requests || []);
+        const userEmail = user?.email
+        const myReqs = await api.get(`/api/my-requests?email=${userEmail}`);
+        console.log("Full Response from Backend:", myReqs);
+        setMyRequests(myReqs.data || []);
       }
     } catch (err) {
       console.error("Fetch error:", err);
@@ -211,7 +213,7 @@ function App() {
       {/* Navigation */}
       <nav className="bg-white border-b p-4 flex justify-between items-center sticky top-0 z-10 shadow-sm">
         <div className="flex items-center gap-4">
-          <h1 className="text-xl font-bold text-indigo-600">BitcommStore</h1>
+          <h1 className="text-xl font-bold text-indigo-600">Store</h1>
           <div className="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-full">
             <span className="text-xs font-bold text-slate-500 uppercase">{user.role}</span>
             <span className="text-xs text-slate-400">•</span>
