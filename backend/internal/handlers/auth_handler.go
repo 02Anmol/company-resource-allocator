@@ -60,7 +60,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	//generate JWT token
+	//generate token(jwt)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user_id":   user.ID,
 		"user_role": user.Role,

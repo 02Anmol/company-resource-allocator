@@ -52,3 +52,12 @@ func DeleteResource(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Resource Delete Successfully"})
 }
+
+func GetAllSpecialRequests(c *gin.Context) {
+	requests, err := repository.GetAllSpecialRequests()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch requests"})
+		return
+	}
+	c.JSON(http.StatusOK, requests)
+}

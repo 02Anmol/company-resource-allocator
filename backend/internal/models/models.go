@@ -30,3 +30,12 @@ type LoginCredential struct {
 	Email    string `json:"email" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
+
+type SpecialRequest struct {
+	ID            int       `json:"id"`
+	EmployeeEmail string    `json:"employee_email"`
+	ItemName      string    `json:"item_name"`
+	Reason        string    `json:"reaosn"`
+	Status        string    `json:"status"`
+	CreatedAt     time.Time `json:"created_at"`
+}

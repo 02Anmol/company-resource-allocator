@@ -48,3 +48,24 @@ func DeleteResource(id int) error {
 	_, err := database.DB.Exec(context.Background(), query, id)
 	return err
 }
+
+func GetAllSpecialRequests() ([]models.SpecialRequest, error) {
+	query := `SELECT id, employee_email, item_name, reason, status, created_at FROM special_requests ORDER BY created_at DESC`
+	rows, err := database.DB.Query(context.Background(), query)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var requests []models.SpecialRequest
+	for rows.Next() {
+		var r models.SpecialRequest
+		err := rows.Scan(&r.ID, &r.EmployeeEmail, &r.ItemName, &r.Reason, &r.Status, &r.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
+		requests = append(requests, r)
+	}
+	return requests, nil
+}

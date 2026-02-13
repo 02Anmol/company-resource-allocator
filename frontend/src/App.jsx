@@ -16,6 +16,10 @@ function App() {
   const [message, setMessage] = useState({ text: "", type: "" })
   const [loading, setLoading] = useState(false)
   const [searchTerm, setSearchTerm] = useState("");
+  const [customItemName, setCustomItemName] = useState("");
+  const [customReason, setCustomReason] = useState("");
+  const [specialRequests, setSpecialRequests] = useState([]); //to store the list for the manager
+  
 
   useEffect(() => {
     if (isAuthenticated()) {
@@ -42,7 +46,11 @@ function App() {
       if (view === "store" && user.role === "store") {
         const approved = await api.get('/api/requests/approved');
         setApprovedRequests(approved.data || []);
+
+        const special = await api.get('/api/special-requests');     // for unavailable resource request
+        setSpecialRequests(special.data || []);
       }
+
 
       if (view === "history") {
         const userEmail = user?.email
@@ -198,6 +206,30 @@ function App() {
     }
   }
 
+  const handleCustomRequest = async(e)=>{
+    e.preventDefault()
+    if(!customItemName || customReason.length<5){
+      setMessage({text: "Please provide itme name with brief reason", type: "error"});
+      return
+    }
+
+    setLoading(true);
+    try{
+      await api.post(`/api/special-request`,{
+        item_name: customItemName,
+        reason: customReason,
+        email: user.email
+      })
+      setMessage({text: "Wishlist request sent to Store Manager", type: "success"})
+      setCustomItemName("")
+      setCustomReason("")
+    }catch(err){
+      setMessage({text: "Failed to send Request", type: "error"})
+    }finally{
+      setLoading(false)
+    }
+  };
+
   // --- FILTER LOGIC ---
   const filteredResources = resources.filter(item => 
     item.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -211,7 +243,7 @@ function App() {
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
       <nav className="bg-white border-b p-4 flex flex-col md:flew-row justify-between items-center sticky top-0 z-10 shadow-sm gap-4">
         <div className="flex items-center justify-between md:w-auto gap-4">
-          <h1 className="text-xl font-bold text-indigo-600">BitcommStore</h1>
+          <h1 className="text-xl font-bold text-indigo-600">InventoryStore</h1>
           <div className="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-full overflow-hidden">
             <span className="text-[10px] md:text-xs font-bold text-slate-500 uppercase">{user.role}</span>
             <span className=" hidden sm:imline text-xs text-slate-400">•</span>
@@ -299,6 +331,32 @@ function App() {
                   <p className="text-xl">No resources found matching "{searchTerm}"</p>
                 </div>
               )}
+            </div>
+            
+            {/* wishlist section */}
+            <div className='mt-16 bg-slate-900 text-white p-8 md:p-12 rounded-[3rem] shadow-2xl relative overflow-hidden'>
+              <div className='relative z-10 max-w-2xl'>
+                <h3 className='text-3xl font-bold mb-3'>Can't find what need?</h3>
+                <p className='text-slate-400 mb-8 text-lg'>
+                  If a specific resource isn't listed, let us know. We will try to arrange it.
+                </p>
+                <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mb-4'>
+                  <input 
+                    className='bg-slate-800 border-none p-4 rounded-2xl placeholder-slate-500 text-whitefocus:ring-2 focus:ring-indigo-500 outline-none'
+                    placeholder='"What do you need?'
+                    value={customItemName}
+                    onChange={(e)=>setCustomReason(e.target.value)}
+                  />
+                </div>
+                <button
+                  onClick={handleCustomRequest}
+                  disabled={loading}
+                  className='w-full md:w-auto bg-indigo-600 text-white px-10 py-4 rounded-2xl font-bold hover:bg-indigo-700 transition-all shadow-lg active:scale-95 disable:opacity-50'
+                >
+                  {loading ? 'Sending...' : 'Send to Store'}
+                </button>
+              </div>
+              <div className='absolute -right-20 -bottom-20 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl'></div>
             </div>
           </div>
         )}
