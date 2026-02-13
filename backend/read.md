@@ -8,7 +8,7 @@ Database: PostgreSQL
 Concurrency: Context-driven queries
 Communication: RESTful JSON API
 
-------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------
 
 Completed Features
 1.Database Layer
@@ -31,7 +31,7 @@ Logic: Uses Database Transactions (tx).
 GET /api/my-requests?email=...: Filtered history view using Query Parameters.
 Bug Fixed: Resolved the resource_id: 0 mapping issue by aligning SQL Scan order.
 
-----------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------
 
 Current API Endpoints:
 
@@ -42,7 +42,7 @@ GET,   | /api/requests/pending   Manager view of all 'pending' items          20
 PATCH, | /api/requests/action    Approve or Reject a request                  200 OK
 GET,   | /api/my-requests        History for a specific employee              200 OK
 
--------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------
 
 Security & Middleware
 
