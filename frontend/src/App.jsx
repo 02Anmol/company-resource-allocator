@@ -209,24 +209,24 @@ function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
-      <nav className="bg-white border-b p-4 flex justify-between items-center sticky top-0 z-10 shadow-sm">
-        <div className="flex items-center gap-4">
+      <nav className="bg-white border-b p-4 flex flex-col md:flew-row justify-between items-center sticky top-0 z-10 shadow-sm gap-4">
+        <div className="flex items-center justify-between md:w-auto gap-4">
           <h1 className="text-xl font-bold text-indigo-600">BitcommStore</h1>
-          <div className="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-full">
-            <span className="text-xs font-bold text-slate-500 uppercase">{user.role}</span>
-            <span className="text-xs text-slate-400">•</span>
-            <span className="text-xs text-slate-600">{user.email}</span>
+          <div className="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-full overflow-hidden">
+            <span className="text-[10px] md:text-xs font-bold text-slate-500 uppercase">{user.role}</span>
+            <span className=" hidden sm:imline text-xs text-slate-400">•</span>
+            <span className="hidden sm:inline text-xs text-slate-600 truncate max-w-[1000px]">{user.email}</span>
           </div>
         </div>
         
-        <div className="flex items-center gap-4">
-          <div className="flex bg-slate-100 p-1 rounded-xl space-x-1">
+        <div className="flex flex-wrap justify-center  items-center gap-2 w-full md:w-auto">
+          <div className="flex bg-slate-100 p-1 rounded-xl space-x-1 overflow-x-auto no-scrollbar">
             {['employee', 'history', 'manager', 'store'].map(v => (
               hasAccessToView(v) && (
                 <button 
                   key={v} 
                   onClick={() => setView(v)} 
-                  className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition ${
+                  className={`px-3 md:px-4 py-2 rounded-lg text-[10px] md:text-xs font-bold uppercase tracking-wider transition whitespace-nowrap ${
                     view === v 
                       ? 'bg-white shadow text-indigo-600' 
                       : 'text-slate-500 hover:text-indigo-900'
@@ -237,7 +237,7 @@ function App() {
               )
             ))}
           </div>
-          <button onClick={handleLogout} className="px-4 py-2 bg-slate-200 hover:bg-slate-300 rounded-xl text-xs font-bold uppercase tracking-wider transition">
+          <button onClick={handleLogout} className="px-3 py-2 bg-slate-200 rounded-xl text-[10px] md:text-xs font-bold uppercase">
             Logout
           </button>
         </div>
@@ -274,9 +274,9 @@ function App() {
         {view === "employee" && (
           <div>
             <h2 className="text-2xl font-bold mb-6">Available Resources</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gqap-6">
               {filteredResources.map(item => (
-                <div key={item.id} className="bg-white p-6 rounded-3xl border shadow-sm">
+                <div key={item.id} className="bg-white p-5 md:p-6 rounded-3xl border shadow-sm">
                   <h3 className="text-xl font-bold mb-2">{item.name}</h3>
                   <p className={`text-sm mb-4 ${
                     item.available_quantity === 0 ? 'text-red-500' :
@@ -339,8 +339,8 @@ function App() {
         {/* Store Manager View */}
         {view === "store" && hasAccessToView('store') && (
           <div className="space-y-8">
-            <div className="bg-white p-6 rounded-3xl border">
-              <h2 className="text-lg font-bold mb-4">Add New Inventory</h2>
+            <div className="bg-white rounded-3xl border shadow-sm overflow-hidden">
+              <h2 className="p-4 md:p-6 text-lg font-bold border-b">Add New Inventory</h2>
               <form onSubmit={handleAddNewResource} className="flex gap-4">
                 <input className="flex-1 border p-3 rounded-xl" placeholder="Item Name" value={newResName} onChange={e => setNewResName(e.target.value)} required minLength={3} disabled={loading} />
                 <input className="w-24 border p-3 rounded-xl" type="number" min="1" value={newResQty} onChange={e => setNewResQty(e.target.value)} required disabled={loading} />
@@ -354,9 +354,9 @@ function App() {
                 <table className="w-full text-left">
                   <thead className='bg-slate-50 border-b'>
                     <tr>
-                      <th className="p-4 text-xs font-black uppercase text-slate-400">Resource Name</th>
-                      <th className="p-4 text-xs font-black uppercase text-slate-400">Current Stock</th>
-                      <th className="p-4 text-xs font-black uppercase text-slate-400 text-right">Action</th>
+                      <th className="p-3 md:p-4 text-[10px] md:text-xs font-black uppercase text-slate-400">Resource Name</th>
+                      <th className="p-3 md:p-4 text-[10px] md:text-xs font-black uppercase text-slate-400">Current Stock</th>
+                      <th className="p-3 md:p-4 text-[10px] text-xs font-black uppercase text-slate-400 text-right">Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -427,8 +427,8 @@ function App() {
 
       {selectedResource && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <form onSubmit={handleRequestSubmit} className="bg-white p-8 rounded-[2rem] max-w-md w-full shadow-2xl">
-            <h2 className="text-2xl font-bold mb-6">Requesting {selectedResource.name}</h2>
+          <form onSubmit={handleRequestSubmit} className="bg-white md:p-8 rounded-[2rem] w-full max-w-[95%]md:max-w-md shadow-2xl">
+            <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6 text-centre md:text-left">Requesting {selectedResource.name}</h2>
             <textarea className="w-full border p-4 rounded-2xl mb-2" placeholder="Reason (min 10 chars)" required minLength={10} maxLength={500} rows={4} value={reason} onChange={e => setReason(e.target.value)} disabled={loading} />
             <p className="text-xs text-slate-400 mb-4 ml-2">{reason.length}/500 characters</p>
             <div className="flex gap-4">
