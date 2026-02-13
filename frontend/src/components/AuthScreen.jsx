@@ -16,7 +16,7 @@ const AuthScreen = ({ onLoginSuccess, setMessage }) => {
     const newErrors = {};
 
     // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/ && /^[^\s@]+@gmail\.com$/;
     if (!formData.email) {
       newErrors.email = "Email is required";
     } else if (!emailRegex.test(formData.email)) {

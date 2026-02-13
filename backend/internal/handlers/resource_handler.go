@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/02Anmol/company-resource-allocator/internal/repository"
@@ -31,4 +32,23 @@ func CreateResource(c *gin.Context) {
 		c.JSON(500, gin.H{"error": "Could not add Item"})
 	}
 	c.JSON(200, gin.H{"message": "Resource added to inventory"})
+}
+
+func DeleteResource(c *gin.Context) {
+	idStr := c.Param("id")
+
+	//convert string to int
+	var id int
+	_, err := fmt.Sscanf(idStr, "%d", &id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID!"})
+		return
+	}
+
+	err = repository.DeleteResource(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Couldn't Delete Resource"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Resource Delete Successfully"})
 }

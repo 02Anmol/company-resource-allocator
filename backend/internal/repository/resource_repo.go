@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"strings"
 
 	"github.com/02Anmol/company-resource-allocator/internal/database"
 	"github.com/02Anmol/company-resource-allocator/internal/models"
@@ -27,7 +28,23 @@ func GetAllResource() ([]models.Resource, error) {
 }
 
 func AddResource(name string, qty int) error {
-	query := `INSERT INTO resources (name, total_quantity, available_quantity) VALUES ($1, $2, $2)`
-	_, err := database.DB.Exec(context.Background(), query, name, qty)
+
+	formattedName := strings.Title(strings.ToLower(strings.TrimSpace(name)))
+
+	query := `
+		INSERT INTO resources (name, total_quantity, available_quantity) 
+		VALUES ($1, $2, $2)
+		ON CONFLICT (name) 
+		DO UPDATE SET 
+			total_quantity = resources.total_quantity + EXCLUDED.total_quantity,
+			available_quantity = resources.available_quantity + EXCLUDED.available_quantity
+	`
+	_, err := database.DB.Exec(context.Background(), query, formattedName, qty)
+	return err
+}
+
+func DeleteResource(id int) error {
+	query := `DELETE FROM resources WHERE id = $1`
+	_, err := database.DB.Exec(context.Background(), query, id)
 	return err
 }

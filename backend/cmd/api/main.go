@@ -49,5 +49,8 @@ func main() {
 	r.POST("/api/auth/signup", handlers.Signup)
 	r.POST("/api/auth/login", handlers.Login)
 
+	//delete route
+	r.DELETE("/api/resources/:id", handlers.DeleteResource)
+
 	r.Run(":8080")
 }
