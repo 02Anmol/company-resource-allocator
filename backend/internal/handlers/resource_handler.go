@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/02Anmol/company-resource-allocator/internal/models"
 	"github.com/02Anmol/company-resource-allocator/internal/repository"
 	"github.com/gin-gonic/gin"
 )
@@ -51,6 +52,20 @@ func DeleteResource(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Resource Delete Successfully"})
+}
+
+func CreateSpecialRequest(c *gin.Context) {
+	var req models.SpecialRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Data"})
+		return
+	}
+	err := repository.CreateSpecialRequest(req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save request"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Wishlist request send"})
 }
 
 func GetAllSpecialRequests(c *gin.Context) {

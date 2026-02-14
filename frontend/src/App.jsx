@@ -47,7 +47,7 @@ function App() {
         const approved = await api.get('/api/requests/approved');
         setApprovedRequests(approved.data || []);
 
-        const special = await api.get('/api/special-requests');     // for unavailable resource request
+        const special = await api.get(`/api/special-requests`);     // for unavailable resource request
         setSpecialRequests(special.data || []);
       }
 
@@ -215,7 +215,7 @@ function App() {
 
     setLoading(true);
     try{
-      await api.post(`/api/special-request`,{
+      await api.post(`/api/special-requests`,{
         item_name: customItemName,
         reason: customReason,
         email: user.email
@@ -345,6 +345,12 @@ function App() {
                     className='bg-slate-800 border-none p-4 rounded-2xl placeholder-slate-500 text-whitefocus:ring-2 focus:ring-indigo-500 outline-none'
                     placeholder='"What do you need?'
                     value={customItemName}
+                    onChange={(e)=>setCustomItemName(e.target.value)}
+                  />
+                  <input 
+                    className='bg-slate-800 border-none p-4 rounded-2xl placeholder-slate-500 text-whitefocus:ring-2 focus:ring-indigo-500 outline-none'
+                    placeholder='"Why do you need it?'
+                    value={customReason}
                     onChange={(e)=>setCustomReason(e.target.value)}
                   />
                 </div>
@@ -365,30 +371,32 @@ function App() {
         {view === "manager" && hasAccessToView('manager') && (
           <div>
             <h2 className="text-2xl font-bold mb-6">Pending Requests</h2>
-            <div className="bg-white rounded-3xl border overflow-hidden">
-              <table className="w-full text-left">
-                <thead className="bg-slate-50 border-b">
-                  <tr>
-                    <th className="p-4">Employee</th>
-                    <th className="p-4">Item</th>
-                    <th className="p-4">Reason</th>
-                    <th className="p-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pendingRequests.map(r => (
-                    <tr key={r.id} className="border-b hover:bg-slate-50">
-                      <td className="p-4 text-sm">{r.employee_email}</td>
-                      <td className="p-4 font-bold">{r.resource_name}</td>
-                      <td className="p-4 text-sm text-slate-600 max-w-xs truncate">{r.reason}</td>
-                      <td className="p-4 text-right space-x-2">
-                        <button onClick={() => handleManagerAction(r.id, 'approve')} disabled={loading} className="bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-emerald-700 disabled:opacity-50">Approve</button>
-                        <button onClick={() => handleManagerAction(r.id, 'reject')} disabled={loading} className="bg-slate-200 px-4 py-2 rounded-xl text-xs font-bold hover:bg-slate-300 disabled:opacity-50">Reject</button>
-                      </td>
+            <div className="bg-white rounded-3xl border overflow-hidden shadow-sm">
+              <div className='overflow-x-auto'>
+                <table className="w-full text-left">
+                  <thead className="bg-slate-50 border-b">
+                    <tr>
+                      <th className="p-4">Employee</th>
+                      <th className="p-4">Item</th>
+                      <th className="p-4">Reason</th>
+                      <th className="p-4 text-right">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {pendingRequests.map(r => (
+                      <tr key={r.id} className="border-b hover:bg-slate-50">
+                        <td className="p-4 text-sm">{r.employee_email}</td>
+                        <td className="p-4 font-bold">{r.resource_name}</td>
+                        <td className="p-4 text-sm text-slate-600 max-w-xs truncate">{r.reason}</td>
+                        <td className="p-4 text-right space-x-2">
+                          <button onClick={() => handleManagerAction(r.id, 'approve')} disabled={loading} className="bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-emerald-700 disabled:opacity-50">Approve</button>
+                          <button onClick={() => handleManagerAction(r.id, 'reject')} disabled={loading} className="bg-slate-200 px-4 py-2 rounded-xl text-xs font-bold hover:bg-slate-300 disabled:opacity-50">Reject</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
               {pendingRequests.length === 0 && <p className="p-10 text-center text-slate-400">No pending approvals.</p>}
             </div>
           </div>
@@ -451,6 +459,33 @@ function App() {
                 </tbody>
               </table>
               {approvedRequests.length === 0 && <p className="p-10 text-center text-slate-400">Nothing to issue yet.</p>}
+            </div>
+            {/* store manager wishlist */}
+            <div className="bg-white rounded-3xl border shadow-sm overflow-hidden">
+              <h2 className='p-6 text-lg font-bold border-b flex itmes-centre gap-2'>
+                <span className='w-2 h-2 bg-orange-500 rounded-full animated-pulse'></span>
+                Employee Wishlist(unavailable resourcce)
+              </h2>
+              <div className='divide-y'>
+                {specialRequests.map(req=>(
+                  <div key={req.id} className="p-6 flex flex-col md:flex-row justify-between gap-4 hover:bg-slate-50 transition">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-bold text-slate-800 text-lg">{req.item_name}</span>
+                        <span className="text-[10px] bg-orange-100 px-2 py-0.5 rounded text-orange-700 uppercase font-bold tracking-tighter">Wishlist Item</span>
+                      </div>
+                      <p className="text-sm text-slate-600 mb-2">{req.reason}</p>
+                      <p className="text-xs text-slate-400">Requested by: <span className="font-medium text-slate-600">{req.employee_email}</span></p>
+                    </div>
+                    <div className="flex items-center text-right md:text-left">
+                       <span className="text-xs text-slate-400 italic">Logged on {new Date(req.created_at).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                ))}
+                {specialRequests.length == 0 && (
+                  <div className="p-16 text-center text-slate-400 italic">No special requests from employee yet</div>
+                )}
+              </div>
             </div>
           </div>
         )}

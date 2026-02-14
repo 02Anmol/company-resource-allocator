@@ -3,9 +3,9 @@ company-resource-portal/
 │   ├── cmd/
 │   │   └── api/
 │   │       └── main.go       # Entry point: starts the server
-│   ├── internal/             # Private application code (un-importable by others)
+│   ├── internal/             # Private application code 
 │   │   ├── database/         # DB connection & migrations
-│   │   ├── handlers/         # HTTP Handlers (The "Controllers")
+│   │   ├── handlers/         # HTTP Handlers (Controllers)
 │   │   ├── models/           # Data Structures (Structs)
 │   │   └── repository/       # Database CRUD logic (SQL queries)
 │   ├── .env                  # Environment variables (DB_URL, JWT_SECRET)
@@ -13,13 +13,12 @@ company-resource-portal/
 │   └── go.sum                # Dependency checksums
 ├── frontend/                 # React.js Frontend
 │   ├── src/
-│   │   ├── api/              # Axios/Fetch calls to Go backend
+│   │   ├── utils/api.js              # Axios/Fetch calls to Go backend
 │   │   ├── components/       # UI building blocks
 │   │   └── pages/            # Employee, Manager, Admin views
 │   └── ...
-└── scripts/                  # SQL scripts to initialize your DB
 
-
+-------------------------------------------------------------------------------------------------------
 
 # 🏢 BitcommStore - Company Resource Allocator
 

@@ -52,5 +52,9 @@ func main() {
 	//delete route
 	r.DELETE("/api/resources/:id", handlers.DeleteResource)
 
+	//unavailable resource request route
+	r.GET("/api/special-requests", handlers.GetAllSpecialRequests)
+	r.POST("api/special-requests", handlers.CreateSpecialRequest)
+
 	r.Run(":8080")
 }

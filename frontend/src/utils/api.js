@@ -8,7 +8,7 @@ const api = axios.create({
   },
 });
 
-// Request interceptor to add auth token
+//request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -24,20 +24,20 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor to handle auth errors
+//response interceptor to handle auth errors
 api.interceptors.response.use(
   (response) => {
     return response;
   },
   (error) => {
-    // Handle 401 Unauthorized
+    //handle 401 Unauthorized
     if (error.response?.status === 401) {
-      // Token expired or invalid
+      //token expired or invalid
       localStorage.removeItem('token');
       localStorage.removeItem('token_expires');
       localStorage.removeItem('user');
       
-      // Redirect to login
+      //redirect to login
       window.location.href = '/';
     }
     

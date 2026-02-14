@@ -49,6 +49,16 @@ func DeleteResource(id int) error {
 	return err
 }
 
+func CreateSpecialRequest(req models.SpecialRequest) error {
+	//we use background context for database operations
+	query := `
+		INSERT INTO special_requests (employee_email, item_name, reason) 
+		VALUES ($1, $2, $3)
+	`
+	_, err := database.DB.Exec(context.Background(), query, req.EmployeeEmail, req.ItemName, req.Reason)
+	return err
+}
+
 func GetAllSpecialRequests() ([]models.SpecialRequest, error) {
 	query := `SELECT id, employee_email, item_name, reason, status, created_at FROM special_requests ORDER BY created_at DESC`
 	rows, err := database.DB.Query(context.Background(), query)
