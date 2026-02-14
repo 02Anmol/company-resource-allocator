@@ -475,7 +475,7 @@ function App() {
                         <span className="text-[10px] bg-orange-100 px-2 py-0.5 rounded text-orange-700 uppercase font-bold tracking-tighter">Wishlist Item</span>
                       </div>
                       <p className="text-sm text-slate-600 mb-2">{req.reason}</p>
-                      <p className="text-xs text-slate-400">Requested by: <span className="font-medium text-slate-600">{req.email}</span></p>
+                      <p className="text-xs text-slate-400">Requested by: <span className="font-medium text-slate-600">{req.employee_email}</span></p>
                     </div>
                     <div className="flex items-center text-right md:text-left">
                        <span className="text-xs text-slate-400 italic">Logged on {new Date(req.created_at).toLocaleDateString()}</span>
